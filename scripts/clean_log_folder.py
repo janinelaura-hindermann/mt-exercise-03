@@ -58,10 +58,12 @@ def process_log_file(input_file_path, output_base):
         for epoch, perplexity in validation_data:
             f.write(f"{epoch}\t{perplexity}\n")
 
+    max_epoch = max(validation_data, default=(0, 0))[0]  # default to 0 if no validation data
+
     # Write the test data to a file
     with open(test_output_path, 'w') as f:
         for perplexity in test_data:
-            f.write(f"{perplexity}\n")
+            f.write(f"{max_epoch}\t{perplexity}\n")
 
 
 def process_directory(directory_path, output_base):

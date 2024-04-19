@@ -2,7 +2,7 @@ import argparse
 import os
 
 """
-Example usage:
+Example call:
 
 python3 clean_log_folder.py ../logs ../logs_clean
 

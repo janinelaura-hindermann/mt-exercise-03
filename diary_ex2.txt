@@ -19,3 +19,6 @@ Parameters used for model training: standard parameters, varying dropout
 log interval to 10 to get the almost very last perplexity value per epoch
 
 then clean the log folder with clean_log_folder.py
+
+then create dataframes with create_log_table.py
+

@@ -60,6 +60,16 @@ def main():
     df_validation.to_csv(os.path.join(args.output_dir, 'validation_dataframe.csv'))
     df_training.to_csv(os.path.join(args.output_dir, 'training_dataframe.csv'))
 
+    # Print the dataframes
+    print("Test Dataframe:")
+    print(df_test)
+
+    print("Validation Dataframe:")
+    print(df_validation)
+
+    print("Training Dataframe:")
+    print(df_training)
+
     # Print the paths to the saved CSV files
     print(f"Test Dataframe saved to: {os.path.join(args.output_dir, 'test_dataframe.csv')}")
     print(f"Validation Dataframe saved to: {os.path.join(args.output_dir, 'validation_dataframe.csv')}")

@@ -22,7 +22,7 @@ SECONDS=0
       --data $data/familyguy \
       --epochs 40 \
       --log-interval 10 \
-      --emsize 200 --nhid 200 --dropout 0.8 --tied \
+      --emsize 200 --nhid 200 --dropout 0.4 --tied \
       --save $models/model.pt \
       --mps \
       --save-perplexities \

@@ -22,3 +22,4 @@ then clean the log folder with clean_log_folder.py
 
 then create dataframes with create_log_table.py
 
+then create plots with plot_perplexity.py

@@ -4,7 +4,7 @@ import os
 """
 Example call:
 
-python3 clean_log_folder.py ../logs ../logs_clean
+python3 clean_log_folder.py --input_directory ../logs --output_directory ../logs_clean
 
 """
 
@@ -80,14 +80,15 @@ def main():
     # Parse command line arguments
     parser = argparse.ArgumentParser(
         description='Process all log files in a directory and output to specified base folder.')
-    parser.add_argument('input_directory', type=str,
+    parser.add_argument('--input_directory', type=str,
                         help='The path to the directory containing log files.')
-    parser.add_argument('output_directory', type=str,
+    parser.add_argument('--output_directory', type=str,
                         help='The path to the base output directory where processed files will be stored.')
     args = parser.parse_args()
 
     # Process the directory using the provided path
     process_directory(args.input_directory, args.output_directory)
+    print('Processing complete.')
 
 
 if __name__ == "__main__":

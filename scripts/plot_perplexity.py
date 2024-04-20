@@ -56,6 +56,8 @@ def main():
     plot_perplexity(args.validation_csv, 'Validation Perplexity Over Epochs', 'validation', args.output_dir)
     plot_perplexity(args.training_csv, 'Training Perplexity Over Epochs', 'training', args.output_dir)
 
+    print('Plots generated successfully!')
+
 
 if __name__ == "__main__":
     main()

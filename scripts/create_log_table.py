@@ -64,6 +64,7 @@ def main():
     print(f"Test Dataframe saved to: {os.path.join(args.output_dir, 'test_dataframe.csv')}")
     print(f"Validation Dataframe saved to: {os.path.join(args.output_dir, 'validation_dataframe.csv')}")
     print(f"Training Dataframe saved to: {os.path.join(args.output_dir, 'training_dataframe.csv')}")
+    print("All dataframes have been saved successfully.")
 
 
 if __name__ == "__main__":

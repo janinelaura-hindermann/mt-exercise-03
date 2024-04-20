@@ -41,4 +41,5 @@ Generate (sample) some text from a trained model with:
 
     ./scripts/generate.sh
 
+-----
 

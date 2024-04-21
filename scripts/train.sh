@@ -22,11 +22,9 @@ SECONDS=0
       --data $data/familyguy \
       --epochs 40 \
       --log-interval 10 \
-      --emsize 200 --nhid 200 --dropout 0.4 --tied \
-      --save $models/model.pt \
+      --emsize 200 --nhid 200 --dropout 0.2 --tied \
+      --save $models/model_0.2.pt \
       --mps \
-      --save-perplexities \
-      --log-file $logs/perplexities_0.8.txt
 )
 echo "time taken:"
 echo "$SECONDS seconds"

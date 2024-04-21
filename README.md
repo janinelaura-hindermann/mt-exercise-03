@@ -171,7 +171,7 @@ Generally, both the training and validation perplexities should follow a similar
 
 In our case, the final test perplexities align pretty well with the final test perplexities. The dropout of 0.4 has the lowest test perplexity and also the lowest validation perplexity which indicates that this is the best dropout setting to choose. It has not the lowest perplexity at training, but suggests that the dropout rate of 0.4 is better at generalization to the test data while e. g. the dropout rate of 0.0 is better at learning the training data (lower perplexity) but worse at generalization than the dropout rate of 0.4 (higher validation and final test perplexity). So we choose the dropout rate of 0.4.
 
-## Sample text lowest perplexity
+**Sample text lowest perplexity**
 
 	for a lot of city tiny <unk> and life ... like , now , I know you &apos;re going to  
 	<unk> , blood , get tampon on his stupid Face . <eos> Except glad Mr <unk> up here I &apos;m  
@@ -179,5 +179,15 @@ In our case, the final test perplexities align pretty well with the final test p
 	new days is then . <eos> I never sometimes or the options and even , like , Nobody helping each  
 	other <unk> their own immediately that would you say you right . <eos> Coming up , as many smell is
 
-## Sample data highest perplexity
+**Sample data highest perplexity**
 
+We got the worst perplexity with the dropout rate of 0.2:
+
+	for a <unk> <unk> . light - a life inside today was a <unk> I <unk> finding a football .  
+	<unk> , blood . <eos> tampon ? <eos> stupid in the other arm , Mr <unk> fake . ( multiracial  
+	the students when <unk> . . face onto an drinks clean with a <unk> <unk> hours tribe . <eos> :  
+	over . a reporter . the stuff ! sometimes or the options . even , I once . helping .  
+	<eos> <unk> their <unk> ? <eos> Which . while the zoo way this sad is to , . smell it
+
+
+We think the text with the lowest perplexity is better than the one with the highest perplexity. It has almost complete sentences and we think the text is a bit humorous ("stupid face") which resembles the training data. The text with the highest perplexity ist not very structured, has a lot of random punctuation in it and still has a lot of "unk" words in it. 

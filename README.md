@@ -426,6 +426,8 @@ For every directory the script creates a pandas dataframe as our table which we 
 	Epoch                                                                 
 	40       80.835491   179.114961    74.338993    87.126646   121.397025
 
+For the full tables please look at the corresponding .csv files in the `logs_csv` directory.
+
 ## Visualize the data
 
 For the visualization still in the `scripts` directory execute the following command in the terminal:

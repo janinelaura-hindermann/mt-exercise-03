@@ -45,8 +45,291 @@ Generate (sample) some text from a trained model with:
 
 # Task 1
 
+## Finding an interesting data set
 
-TODO
+For this first part, refer to the folder `Family-Guy-Dialogues`.
+
+From [Kaggle](https://www.kaggle.com/datasets/eswarreddy12/family-guy-dialogues-with-various-lexicon-ratings), we downloaded the file `Family_Guy_Final_NRC_AFINN_BING.csv`, which contains dialogue data from all episodes spanning seasons 1 to 19 of the animated television series "Family Guy", along with associated ratings from various lexicons.
+The `convert_cvs_to_txt.py` file extracts the column “Dialogues” from the .cvs file and writes it in a .txt file.
+Since the original file (`attempts` > `family_guy_dialogues_without_filtering_lines.txt`) turned out to be very large (155242 lines/segments), we implemented a “filter” in the program that only writes in the .txt file dialogues that are at least 17 words long (>= 17).
+
+The different attempts we made are available in the `attempts` folder. Below are reported the number of lines for each "filter" (minimum word number) attempt:
+
+	>= 10 -> 39321 lines
+	>= 15 -> 12632 lines
+	>= 16 -> 10045 lines
+	>= 17 -> 8043  lines
+	>= 18 -> 6434  lines
+	>= 20 -> 4239  lines
+
+We also removed duplicate lines. This way our data set `family_guy_dialogues.txt` (also available in the `data` > `familyguy`> `raw`folder) has 7514 lines/segments.
+
+
+## Preprocessing
+
+We modified the `download_data.sh` script as fallows:
+- removed the `# link default training data for easier access`part
+- removed the `# download a different interesting data set!`part
+- adapted the `# preprocess slightly` and the `# tokenize, fix vocabulary upper bound` parts to our new data set (we kept a vocabulary size of 5000)
+- adapted the `# split into train, valid and test` part (see below)
+
+After running `preprocess_raw.py` and `preprocess.py` we obtained the file `family_guy_dialogues.preprocessed.txt`of 9951 lines/segments.
+	
+ 	wc -l data/familyguy/raw/family_guy_dialogues.preprocessed.txt
+    # 9951 data/familyguy/raw/family_guy_dialogues.preprocessed.txt
+    
+    
+Taking a closer look at the `grimm` example, we noticed that the splitting ratios are about 75% for training, 10% for validation, and 10% for testing.
+
+	wc -l data/grimm/*.txt
+    # 400 data/grimm/test.txt
+    # 2955 data/grimm/train.txt
+    # 400 data/grimm/valid.txt
+    # 3755 total
+
+The actual total is 3915 `data/grimm/raw/tales.preprocessed.txt`.
+
+	
+Therefore, for our dataset of 9951 lines:
+- Validation: 10% of 9951 = 995
+- Testing:    10% of 9951 = 995
+- Training:   80% of 9951 = 7960
+	
+So we adapted the `# split into train, valid and test` part of the script as follows:
+	
+	validation: first 995 lines from the preprocessed text file
+	# head -n 995 $data/familyguy/raw/family_guy_dialogues.preprocessed.txt | tail -n 995 > $data/familyguy/family_guy_dialogues/valid.txt
+	
+	testing: lines from 996 to 1990 from the preprocessed text file
+	# head -n 1990 $data/familyguy/raw/family_guy_dialogues.preprocessed.txt | tail -n 995 > $data/familyguy/family_guy_dialogues/test.txt
+	
+	training: all lines from the 1991st line to the end of the preprocessed text file
+	# tail -n +1991 $data/familyguy/raw/family_guy_dialogues.preprocessed.txt > $data/familyguy/family_guy_dialogues/train.txt
+	
+...and when we checked:
+
+	wc -l data/familyguy/*.txt                                    
+    # 995 data/familyguy/test.txt
+    # 7961 data/familyguy/train.txt
+    # 995 data/familyguy/valid.txt
+    # 9951 total
+
+
+## Training a model and generating a sample text
+
+At this point we ran the `train.sh`script (we changed `grimm` with `familyguy`) to train the model and afterwards the `generate.sh` script to generate some sample text.
+First, we trained the model with the standard settings, and then we experimented a little by training the model with different parameters. The results are reported bellow.
+
+### Standard settings
+Parameters: epochs 40 \ log-interval 100 \ emsize 200 \ nhid 200 \ dropout 0.5
+
+Standard settings - Training
+
+	| epoch   1 |   100/  233 batches | lr 20.00 | ms/batch 62.01 | loss  6.28 | ppl   531.27
+	| epoch   1 |   200/  233 batches | lr 20.00 | ms/batch 60.85 | loss  5.35 | ppl   209.92
+	-----------------------------------------------------------------------------------------
+	| end of epoch   1 | time: 14.96s | valid loss  5.12 | valid ppl   167.31
+	-----------------------------------------------------------------------------------------
+	
+	[...]
+	
+	-----------------------------------------------------------------------------------------
+	| epoch  20 |   100/  233 batches | lr 5.00 | ms/batch 62.14 | loss  4.06 | ppl    57.86
+	| epoch  20 |   200/  233 batches | lr 5.00 | ms/batch 61.58 | loss  3.98 | ppl    53.50
+	-----------------------------------------------------------------------------------------
+	| end of epoch  20 | time: 15.07s | valid loss  4.38 | valid ppl    79.58
+	-----------------------------------------------------------------------------------------
+	
+	[...]
+	
+	-----------------------------------------------------------------------------------------
+	| epoch  40 |   100/  233 batches | lr 0.02 | ms/batch 62.07 | loss  3.99 | ppl    54.32
+	| epoch  40 |   200/  233 batches | lr 0.02 | ms/batch 61.31 | loss  3.91 | ppl    49.77
+	-----------------------------------------------------------------------------------------
+	| end of epoch  40 | time: 15.01s | valid loss  4.36 | valid ppl    78.41
+	-----------------------------------------------------------------------------------------
+	=========================================================================================
+	| End of training | test loss  4.28 | test ppl    72.03
+	=========================================================================================
+	time taken:
+	604 seconds
+
+Standard settings - Generated text
+
+	. <eos> What &apos;s on from this point ? <eos> We put a panic PBS base on a <unk> dry
+	<unk> and 00 base &apos; n &apos; cry He &apos;s no one for someone else , or or whatever a
+	five sex . <eos> Well , you &apos;ve always asked me to bring us to <unk> in the <unk> of
+	the rug and now I want you . <eos> On the school . <eos> Who you have said the or
+	my daughters was just , like , it &apos;s knowing that your father has I feel , but throwing out
+
+
+### Changing parameters
+A) Paramenters: epochs 80 \ log-interval 100 \ emsize 300 \ nhid 300 \ dropout 0.3
+	
+A - Training
+	
+	| epoch   1 |   100/  233 batches | lr 20.00 | ms/batch 103.24 | loss  6.39 | ppl   594.56
+	| epoch   1 |   200/  233 batches | lr 20.00 | ms/batch 102.05 | loss  5.33 | ppl   207.21
+	-----------------------------------------------------------------------------------------
+	| end of epoch   1 | time: 25.00s | valid loss  5.10 | valid ppl   164.73
+	-----------------------------------------------------------------------------------------
+	
+	[...]
+	
+	-----------------------------------------------------------------------------------------
+	| epoch  40 |   100/  233 batches | lr 0.00 | ms/batch 105.88 | loss  3.58 | ppl    35.98
+	| epoch  40 |   200/  233 batches | lr 0.00 | ms/batch 103.77 | loss  3.43 | ppl    30.80
+	-----------------------------------------------------------------------------------------
+	| end of epoch  40 | time: 25.53s | valid loss  4.39 | valid ppl    80.67
+	-----------------------------------------------------------------------------------------
+	
+	[...]
+	
+	-----------------------------------------------------------------------------------------
+	| epoch  80 |   100/  233 batches | lr 0.00 | ms/batch 102.51 | loss  3.58 | ppl    35.93
+	| epoch  80 |   200/  233 batches | lr 0.00 | ms/batch 101.50 | loss  3.43 | ppl    30.80
+	-----------------------------------------------------------------------------------------
+	| end of epoch  80 | time: 24.94s | valid loss  4.39 | valid ppl    80.67
+	-----------------------------------------------------------------------------------------
+	=========================================================================================
+	| End of training | test loss  4.30 | test ppl    73.51
+	=========================================================================================
+	time taken:
+	2042 seconds
+
+A - Generated text
+	
+	till travel What they know from , for the world ... and a father &apos;ll be back here , like
+	something kill Lois . <eos> Look , I &apos;m an smart man for a <unk> , but Stewie &apos;ll be
+	five pieces . <eos> Well , you &apos;ve always asked me to pooping down . <eos> I &apos;m Tom Tucker
+	&apos;s Peter Griffin , who the man nation her , I &apos;m seven advice a year . <eos> But or
+	my daughters support him , you &apos;ve been getting knowing about your father , I don &apos;t know . <eos>
+
+
+B) Parameters: epochs 40 \ log-interval 100 \ emsize 400 \ nhid 400 \ dropout 0.2
+	
+B - Training
+	
+	| epoch   1 |   100/  233 batches | lr 20.00 | ms/batch 148.47 | loss  6.41 | ppl   610.83
+	| epoch   1 |   200/  233 batches | lr 20.00 | ms/batch 146.18 | loss  5.31 | ppl   202.21
+	-----------------------------------------------------------------------------------------
+	| end of epoch   1 | time: 35.77s | valid loss  5.07 | valid ppl   159.15
+	-----------------------------------------------------------------------------------------
+	
+	[...]
+	
+	-----------------------------------------------------------------------------------------
+	| epoch  20 |   100/  233 batches | lr 0.02 | ms/batch 156.85 | loss  3.53 | ppl    34.04
+	| epoch  20 |   200/  233 batches | lr 0.02 | ms/batch 157.30 | loss  3.34 | ppl    28.19
+	-----------------------------------------------------------------------------------------
+	| end of epoch  20 | time: 37.82s | valid loss  4.44 | valid ppl    85.18
+	-----------------------------------------------------------------------------------------
+	
+	[...]
+	
+	-----------------------------------------------------------------------------------------
+	| epoch  40 |   100/  233 batches | lr 0.00 | ms/batch 150.09 | loss  3.52 | ppl    33.88
+	| epoch  40 |   200/  233 batches | lr 0.00 | ms/batch 150.11 | loss  3.33 | ppl    28.08
+	-----------------------------------------------------------------------------------------
+	| end of epoch  40 | time: 36.55s | valid loss  4.44 | valid ppl    85.13
+	-----------------------------------------------------------------------------------------
+	=========================================================================================
+	| End of training | test loss  4.34 | test ppl    76.93
+	=========================================================================================
+	time taken:
+	3114 seconds
+	
+B - Generated text
+
+	. <eos> What &apos;s on our family for the world ... and the Quahog C brought me a <unk> dry
+	<unk> . <eos> I &apos;ve never had a lovely friend , and I like a few bucks or so I
+	can &apos;t believe them and all those famous people have to become bad . <eos> <unk> I &apos;m Tom Tucker
+	who has a veteran is a <unk> nation for having the problem . <eos> Who you have said the <unk>
+	<unk> daughters the just pork and <unk> . <eos> The currently <unk> dealing of <unk> <unk> , is throwing over
+
+
+C) Parameters: epochs 40 \ log-interval 100 \ emsize 100 \ nhid 100 \ dropout 0.4
+	
+C - Training
+	
+	| epoch   1 |   100/  233 batches | lr 20.00 | ms/batch 32.27 | loss  6.27 | ppl   527.36
+	| epoch   1 |   200/  233 batches | lr 20.00 | ms/batch 30.92 | loss  5.44 | ppl   229.58
+	-----------------------------------------------------------------------------------------
+	| end of epoch   1 | time:  7.67s | valid loss  5.15 | valid ppl   171.62
+	-----------------------------------------------------------------------------------------
+	
+	[...]
+	
+	-----------------------------------------------------------------------------------------
+	| epoch  20 |   100/  233 batches | lr 5.00 | ms/batch 31.48 | loss  4.24 | ppl    69.09
+	| epoch  20 |   200/  233 batches | lr 5.00 | ms/batch 30.88 | loss  4.16 | ppl    64.02
+	-----------------------------------------------------------------------------------------
+	| end of epoch  20 | time:  7.60s | valid loss  4.45 | valid ppl    85.75
+	-----------------------------------------------------------------------------------------
+
+	[...]
+	
+	-----------------------------------------------------------------------------------------
+	| epoch  40 |   100/  233 batches | lr 0.02 | ms/batch 31.37 | loss  4.16 | ppl    64.22
+	| epoch  40 |   200/  233 batches | lr 0.02 | ms/batch 31.06 | loss  4.09 | ppl    59.62
+	-----------------------------------------------------------------------------------------
+	| end of epoch  40 | time:  7.60s | valid loss  4.43 | valid ppl    83.62
+	-----------------------------------------------------------------------------------------
+	=========================================================================================
+	| End of training | test loss  4.34 | test ppl    77.07
+	=========================================================================================
+	time taken:
+	307 seconds
+
+C - Generated text
+
+	. <eos> What &apos;s on from this point , they have a <unk> for you to fall with there like
+	something and Lois &apos;s been talking for a village &apos; , and I like a <unk> of or spread on
+	five pieces . <eos> Well , you &apos;ve always like to fight pooping to the <unk> and with people who
+	&apos;s going to sell out . <eos> Well , we &apos;t do it like a good beer in the <unk>
+	for Hollywood old just , and I am gonna help someone who catches a <unk> gently . <eos> We pray
+
+
+D) Parameters: epochs 100 \ log-interval 100 \ emsize 200 \ nhid 200 \ dropout 0.3
+	
+D - Training
+	
+	| epoch   1 |   100/  233 batches | lr 20.00 | ms/batch 63.19 | loss  6.28 | ppl   536.41
+	| epoch   1 |   200/  233 batches | lr 20.00 | ms/batch 60.86 | loss  5.34 | ppl   208.63
+	-----------------------------------------------------------------------------------------
+	| end of epoch   1 | time: 15.10s | valid loss  5.07 | valid ppl   159.45
+	-----------------------------------------------------------------------------------------
+	
+	[...]
+	
+	-----------------------------------------------------------------------------------------
+	| epoch  50 |   100/  233 batches | lr 0.00 | ms/batch 60.81 | loss  3.66 | ppl    38.75
+	| epoch  50 |   200/  233 batches | lr 0.00 | ms/batch 60.68 | loss  3.54 | ppl    34.52
+	-----------------------------------------------------------------------------------------
+	| end of epoch  50 | time: 14.79s | valid loss  4.39 | valid ppl    80.59
+	-----------------------------------------------------------------------------------------
+	
+	[...]
+	
+	-----------------------------------------------------------------------------------------
+	| epoch 100 |   100/  233 batches | lr 0.00 | ms/batch 61.44 | loss  3.65 | ppl    38.65
+	| epoch 100 |   200/  233 batches | lr 0.00 | ms/batch 60.78 | loss  3.54 | ppl    34.52
+	-----------------------------------------------------------------------------------------
+	| end of epoch 100 | time: 14.89s | valid loss  4.39 | valid ppl    80.59
+	-----------------------------------------------------------------------------------------
+	=========================================================================================
+	| End of training | test loss  4.29 | test ppl    73.09
+	=========================================================================================
+	time taken:
+	3090 seconds
+		
+D - Generated text
+	
+	around an hour again . <eos> That &apos;s right , so if you were rather a child with me dry
+	and kill yourself for a hot hole . <eos> A smart man for Brian <unk> , or Stewie Griffin &apos;s
+	five pieces . <eos> Well , we &apos;ve got an issue of pooping , so we don &apos;t want to
+	come through the sun . <eos> And now we can &apos;t do it like a good beer in the <unk>
+	for Hollywood . <eos> I know , it &apos;s been currently about dealing on I <unk> up our throwing until
 
 ----
 # Task 2
